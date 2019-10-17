@@ -1,0 +1,6 @@
+{{ range . }}
+Total Rows: {{.TotalRows}}
+Unique Values:
+{{ range $k, $v := .UniqueValues }} {{$k}}: {{$v}}
+{{ end }}
+{{ end }}

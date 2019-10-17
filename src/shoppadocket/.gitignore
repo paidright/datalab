@@ -1,0 +1,6 @@
+receipt.txt
+*.csv
+dist
+.got_packr_bin
+packrd
+main-packr.go
