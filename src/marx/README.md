@@ -6,8 +6,10 @@
 
 Marx takes a set of CSV files in a directory and creates a union (geddit?) of their contents.
 
-By default it will slurp up all csv files in the current working directory and save the output in the `./output` directory with a filename based on the current timestamp. You can overwrite these defaults with flags if you like:
+By default it will slurp up all csv files in the current working directory and emit the output to stdout. You can overwrite these defaults with flags if you like:
+
+Note that if you try and pipe to a file in the cwd Marx will try and union the output file, fail, and exit immediately.
 
 ```
-./marx --input . --output ./output/Aug_27-14_04_05_19.csv
+./marx --input . > ./output/output.csv
 ```
