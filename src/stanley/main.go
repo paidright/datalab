@@ -51,6 +51,8 @@ func join(key string, left io.Reader, right io.Reader, dest *csv.Writer) error {
 
 		headers := util.Uniq(append(leftHeaders, cols...))
 
+		headers = append(headers, "left_original_line_number", "right_original_line_number")
+
 		if err := dest.Write(headers); err != nil {
 			return []string{}, err
 		}

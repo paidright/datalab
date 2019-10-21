@@ -32,8 +32,8 @@ stanley --left left.csv --join-key id < right.csv
 Will produce:
 
 ```
-id,foo,bar
-1,a,0
-2,x,y
-1,a,b
+id,foo,bar,left_original_line_number,right_original_line_number,
+1,a,0,2,4,
+2,x,y,3,3,
+1,a,b,2,2,
 ```
