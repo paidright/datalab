@@ -19,13 +19,13 @@ test:
 	go test -cover $(TOOLS)
 
 clean:
-	-rm -r dist/datalab/*
+	-rm -r dist/github.com/paidright/datalab/*
 
-dist/datalab/sort_csv: ./sort_csv.sh
+dist/github.com/paidright/datalab/sort_csv: ./sort_csv.sh
 	-mkdir -p ./dist/datalab
-	cp sort_csv.sh dist/datalab/sort_csv
+	cp sort_csv.sh dist/github.com/paidright/datalab/sort_csv
 
-dist: clean dist/datalab/sort_csv
+dist: clean dist/github.com/paidright/datalab/sort_csv
 	echo $(TOOLS)
 	set -e; \
 	for dir in $(TOOLS); do \
