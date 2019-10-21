@@ -30,7 +30,7 @@ dist: clean dist/datalab/sort_csv
 	set -e; \
 	for dir in $(TOOLS); do \
 		ls; \
-		cd ../$$dir && make version.go && cd ../..; \
+		cd $$GOPATH/src/$$dir && make version.go && cd ../..; \
 		echo building $$dir; \
 		packr2 build -o ./dist/`echo $$dir | sed s/src//` $$dir; \
 	done
