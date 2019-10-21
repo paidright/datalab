@@ -1,13 +1,14 @@
 package main
 
 import (
-	"datalab/util"
 	"encoding/csv"
 	"flag"
 	"log"
 	"os"
 	"path"
 	"strconv"
+
+	"github.com/paidright/datalab/util"
 )
 
 var version = flag.Bool("version", false, "Just print the version and exit")

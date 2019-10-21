@@ -1,4 +1,4 @@
-module datalab
+module github.com/paidright/datalab
 
 go 1.13
 

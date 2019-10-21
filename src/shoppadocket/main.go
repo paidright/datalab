@@ -2,12 +2,13 @@ package main
 
 import (
 	"bytes"
-	"datalab/util"
 	"flag"
 	"fmt"
 	"html/template"
 	"log"
 	"os"
+
+	"github.com/paidright/datalab/util"
 
 	"github.com/gobuffalo/packr/v2"
 )
