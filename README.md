@@ -1,6 +1,6 @@
 # Datalab
 
-![Datalab Logo](https://notbad.software/img/datalab_logo.png "Picture of a scientist holding a beaker")
+![Datalab Logo](https://notbad.software/img/datalab_logo.jpg "Picture of a scientist holding a beaker")
 
 Datalab is a collection of UNIX-y tools designed for working with CSV data. Read the individual READMEs to find out what they each do, but they are all designed along the following princples:
 
