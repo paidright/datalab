@@ -109,8 +109,10 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 			return cachedHeaders, nil
 		}
 
+		cachedHeaders = append([]string{}, headers...)
+
 		if len(columns) == 0 {
-			columns = headers
+			columns = cachedHeaders
 		}
 
 		if flags["rename"].active {
@@ -120,28 +122,28 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 			if len(columns) == 0 {
 				return []string{}, fmt.Errorf("Cannot rename without setting a single target column")
 			}
-			for i, header := range headers {
+			for i, header := range cachedHeaders {
 				if header == columns[0] {
-					headers[i] = flags["rename"].value
+					cachedHeaders[i] = flags["rename"].value
 				}
 			}
 		}
 
 		if flags["splitOnDelim"].active {
 			for _, col := range columns {
-				headers = append(headers, suffixed(col, columns, 1))
+				cachedHeaders = append(cachedHeaders, suffixed(col, columns, 1))
 			}
 		}
 
 		if flags["cp"].active {
 			for _, col := range columns {
-				headers = append(headers, suffixed(col, columns, 1))
+				cachedHeaders = append(cachedHeaders, suffixed(col, columns, 1))
 			}
 		}
 
 		if flags["drop"].active {
 			newHeaders := []string{}
-			for _, header := range headers {
+			for _, header := range cachedHeaders {
 				shouldDrop := false
 				for _, col := range columns {
 					if col == header {
@@ -152,17 +154,15 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 					newHeaders = append(newHeaders, header)
 				}
 			}
-			headers = newHeaders
+			cachedHeaders = newHeaders
 		}
 
-		if err := output.Write(headers); err != nil {
+		if err := output.Write(cachedHeaders); err != nil {
 			return []string{}, err
 		}
 		output.Flush()
 
-		cachedHeaders = headers
-
-		return headers, nil
+		return cachedHeaders, nil
 	}
 
 	work, errors := util.ReadSourceAsync(input)
