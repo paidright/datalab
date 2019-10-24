@@ -71,6 +71,21 @@ qwe,poi
 xyz,abc
 ```
 
+`--replace-cell-lookup 123,two,456,two`
+```
+one,two
+456,poi
+123,abc
+789,xyz
+```
+Becomes:
+```
+one,two
+poi,poi
+abc,abc
+789,xyz
+```
+
 `--rename asd --columns two`
 ```
 one,two

@@ -81,6 +81,28 @@ func TestGumption(t *testing.T) {
 		},
 		{
 			flags: map[string]flagval{
+				"replaceCellLookup": flagval{
+					active: true,
+					replacements: []replacement{
+						{
+							from: "123",
+							to:   "two",
+						},
+						{
+							from: "456",
+							to:   "two",
+						},
+					},
+				},
+			},
+			input: `one,two
+456,poi
+123,abc
+789,xyz`,
+			want: []string{"poi,poi", "abc,abc", "789,xyz"},
+		},
+		{
+			flags: map[string]flagval{
 				"rename": flagval{
 					active: true,
 					value:  "asd",

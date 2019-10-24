@@ -21,6 +21,7 @@ var unquote = flag.Bool("unquote", false, "Strip quotation marks from strings")
 var commasToPoints = flag.Bool("commas-to-points", false, "Replace all commas with full stops")
 var addMissing = flag.String("add-missing", "", "String with which to replace blank fields")
 var replaceCell = flag.String("replace-cell", "", "Take any cells that match X and replace it with Y eg: X,Y. You may specify multiple tuples, ie: A,B,X,Y")
+var replaceCellLookup = flag.String("replace-cell-lookup", "", "Take any cells that match X and replace it with the value found in column Y eg: X,Y. You may specify multiple tuples, ie: A,B,X,Y")
 var rename = flag.String("rename", "", "New name to assign to the column(s)")
 var splitOnDelim = flag.String("split", "", "Delimiter on which to split the column(s)")
 var cp = flag.Bool("copy", false, "Whether to copy the column(s)")
@@ -67,6 +68,10 @@ func main() {
 		"replaceCell": flagval{
 			active:       *replaceCell != "",
 			replacements: parseReplacements(*replaceCell),
+		},
+		"replaceCellLookup": flagval{
+			active:       *replaceCellLookup != "",
+			replacements: parseReplacements(*replaceCellLookup),
 		},
 		"rename": flagval{
 			active: *rename != "",
@@ -198,6 +203,14 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 				for _, rep := range flags["replaceCell"].replacements {
 					if cell == rep.from {
 						cell = rep.to
+					}
+				}
+			}
+
+			if flags["replaceCellLookup"].active {
+				for _, rep := range flags["replaceCellLookup"].replacements {
+					if cell == rep.from {
+						cell = line.Data[rep.to]
 					}
 				}
 			}
