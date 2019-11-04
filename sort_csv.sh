@@ -1,2 +1,2 @@
 #!/bin/bash
-head -n 1 "$1" > "$2" && tail -n +2 "$1" | sort >> "$2"
+awk 'NR<2{print $0;next}{print $0| "sort -r"}'
