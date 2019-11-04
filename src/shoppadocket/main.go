@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"flag"
-	"fmt"
 	"html/template"
 	"log"
 	"os"
@@ -71,7 +70,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(b.String())
+	log.Println(b.String())
 
 	logDone()
 }
