@@ -68,8 +68,8 @@ func processFile(file string, headers []string, output *csv.Writer) error {
 	work, errors := util.ReadFileAsync(file)
 
 	for line := range work {
-		if line.Number%10000 == 0 {
-			log.Printf("INFO up to line number: %+v \n", line.Number)
+		if line.Number%100000 == 0 {
+			log.Printf("INFO marx up to line number: %+v \n", line.Number)
 		}
 		record := []string{}
 		for _, col := range headers {
