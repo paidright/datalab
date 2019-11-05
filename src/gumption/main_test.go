@@ -171,6 +171,19 @@ func TestGumption(t *testing.T) {
 		},
 		{
 			flags: map[string]flagval{
+				"stompAlphas": flagval{
+					active: true,
+				},
+			},
+			cols: []string{"two"},
+			input: `one,two,three
+123,1,abc
+123,a,xyz
+123,ab2a,abc`,
+			want: []string{"one,two,three", "123,1,abc", "123,,xyz", "123,2,abc"},
+		},
+		{
+			flags: map[string]flagval{
 				"stripLeadingZeroes": flagval{
 					active: true,
 				},

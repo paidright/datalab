@@ -142,3 +142,18 @@ Becomes:
 one,asd
 123,abc
 ```
+
+`--stomp-alphas --columns two`
+```
+one,two,three
+123,1,abc
+123,a,xyz
+123,ab2a,abc
+```
+Becomes:
+```
+one,two,three
+123,1,abc
+123,,xyz
+123,2,abc
+```

@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/paidright/datalab/util"
@@ -27,6 +28,7 @@ var rename = flag.String("rename", "", "New name to assign to the column(s)")
 var splitOnDelim = flag.String("split", "", "Delimiter on which to split the column(s)")
 var cp = flag.Bool("copy", false, "Whether to copy the column(s)")
 var drop = flag.Bool("drop", false, "Whether to drop the column(s)")
+var stompAlphas = flag.Bool("stomp-alphas", false, "Remove all alpha (A-Z,a-z) characters")
 
 var columns []string
 
@@ -92,6 +94,9 @@ func main() {
 		"drop": flagval{
 			active: *drop,
 		},
+		"stompAlphas": flagval{
+			active: *stompAlphas,
+		},
 	}
 
 	for k, flag := range flags {
@@ -113,6 +118,11 @@ func main() {
 
 func gumption(input io.Reader, output csv.Writer, columns []string, flags map[string]flagval) error {
 	cachedHeaders := []string{}
+
+	alphas, err := regexp.Compile("[a-zA-Z]+")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	handleHeaders := func(headers []string) ([]string, error) {
 		if len(cachedHeaders) > 0 {
@@ -224,6 +234,10 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 				for _, rep := range flags["replaceChar"].replacements {
 					cell = strings.ReplaceAll(cell, rep.from, rep.to)
 				}
+			}
+
+			if flags["stompAlphas"].active {
+				cell = alphas.ReplaceAllString(cell, "")
 			}
 
 			line.Data[col] = cell
