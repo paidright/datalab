@@ -6,7 +6,9 @@ import (
 	"log"
 	"os"
 	"path"
+	"runtime"
 	"strconv"
+	"sync"
 
 	"github.com/paidright/datalab/util"
 )
@@ -67,26 +69,39 @@ func processFile(file string, headers []string, output *csv.Writer) error {
 
 	work, errors := util.ReadFileAsync(file)
 
-	for line := range work {
-		if line.Number%100000 == 0 {
-			log.Printf("INFO marx up to line number: %+v \n", line.Number)
-		}
-		record := []string{}
-		for _, col := range headers {
-			if col == "original_file_name" {
-				line.Data[col] = file
-			}
-			if col == "original_row_number" {
-				line.Data[col] = strconv.Itoa(line.Number)
-			}
-			record = append(record, line.Data[col])
-		}
+	mutex := sync.Mutex{}
 
-		if err := output.Write(record); err != nil {
-			return err
-		}
-		output.Flush()
+	workers := sync.WaitGroup{}
+	for _, _ = range make([]bool, runtime.GOMAXPROCS(0)) {
+		workers.Add(1)
+		go (func() {
+			for line := range work {
+				if line.Number%100000 == 0 {
+					log.Printf("INFO marx up to line number: %+v \n", line.Number)
+				}
+				record := []string{}
+				for _, col := range headers {
+					if col == "original_file_name" {
+						line.Data[col] = file
+					}
+					if col == "original_row_number" {
+						line.Data[col] = strconv.Itoa(line.Number)
+					}
+					record = append(record, line.Data[col])
+				}
+
+				mutex.Lock()
+				if err := output.Write(record); err != nil {
+					log.Fatal(err)
+				}
+				mutex.Unlock()
+			}
+			workers.Done()
+		})()
 	}
+
+	workers.Wait()
+	output.Flush()
 
 	var cachedErr error
 
