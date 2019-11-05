@@ -103,6 +103,28 @@ func TestGumption(t *testing.T) {
 		},
 		{
 			flags: map[string]flagval{
+				"replaceChar": flagval{
+					active: true,
+					replacements: []replacement{
+						{
+							from: ":",
+							to:   ".",
+						},
+						{
+							from: ";",
+							to:   ".",
+						},
+					},
+				},
+			},
+			cols: []string{"one"},
+			input: `one,two
+4:56,7:89
+1;23,abc`,
+			want: []string{"4.56,7:89", "1.23,abc"},
+		},
+		{
+			flags: map[string]flagval{
 				"rename": flagval{
 					active: true,
 					value:  "asd",

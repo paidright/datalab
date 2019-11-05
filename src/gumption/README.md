@@ -86,6 +86,19 @@ abc,abc
 789,xyz
 ```
 
+`--replace-char -,_,;,:`
+```
+one,two
+-,poi
+;,abc
+```
+Becomes:
+```
+one,two
+_,poi
+:,abc
+```
+
 `--rename asd --columns two`
 ```
 one,two
