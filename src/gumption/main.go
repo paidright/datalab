@@ -291,6 +291,11 @@ func suffixed(target string, cols []string, i int) string {
 
 func parseReplacements(input string) []replacement {
 	parts := strings.Split(input, ",")
+	for i, part := range parts {
+		if part == "GUMPTION_LITERAL_COMMA" {
+			parts[i] = ","
+		}
+	}
 	replacements := []replacement{}
 	for i, part := range parts {
 		if (i+1)%2 == 0 {
