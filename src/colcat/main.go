@@ -58,9 +58,7 @@ func processFile(input io.Reader, targets []target, output csv.Writer) error {
 
 		passthroughHeaders := []string{}
 		for _, header := range headers {
-			if !util.Contains(header, allSources) {
-				passthroughHeaders = append(passthroughHeaders, header)
-			}
+			passthroughHeaders = append(passthroughHeaders, header)
 		}
 
 		allDests := []string{}

@@ -30,7 +30,7 @@ a,b,c`)
 	writer.Flush()
 
 	for _, ex := range []string{
-		"hi,baz", "a,b-c", "1,2-3",
+		"hi,foo,bar,baz", "a,b,c,b-c", "1,2,3,2-3",
 	} {
 		assert.Contains(t, result.String(), ex)
 	}

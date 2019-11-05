@@ -33,7 +33,7 @@ colcat --targetFile targets.csv < input.csv
 Will produce:
 
 ```
-hi,baz
-a,b-c
-1,2-3
+hi,foo,bar,baz
+a,b,c,b-c
+1,2,3,2-3
 ```
