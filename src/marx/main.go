@@ -128,30 +128,6 @@ func enumerateHeaders(names []string) ([]string, error) {
 	return util.Uniq(cols), nil
 }
 
-func appendLine(target string, line []string) error {
-	dir, _ := path.Split(target)
-	if dir != "" {
-		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
-			return err
-		}
-	}
-
-	f, err := os.OpenFile(target, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	w := csv.NewWriter(f)
-	if err := w.Write(line); err != nil {
-		return err
-	}
-
-	w.Flush()
-
-	return nil
-}
-
 func logDone() {
 	if *quiet {
 		return
