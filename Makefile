@@ -22,7 +22,7 @@ clean:
 	-rm -r dist/github.com/paidright/datalab/*
 
 dist/github.com/paidright/datalab/sort_csv: ./sort_csv.sh
-	-mkdir -p ./dist/datalab
+	-mkdir -p ./dist/github.com/paidright/datalab
 	cp sort_csv.sh dist/github.com/paidright/datalab/sort_csv
 
 dist: clean dist/github.com/paidright/datalab/sort_csv
