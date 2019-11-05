@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/csv"
 	"flag"
 	"html/template"
 	"log"
@@ -41,7 +42,26 @@ func main() {
 
 	colMap := map[string]map[string]bool{}
 
+	output := csv.NewWriter(os.Stdout)
+
+	headerWritten := false
+
 	if err := util.ReadSource(os.Stdin, func(line map[string]string, cols []string, lineNumber int) error {
+		// Pass through data
+		if !headerWritten {
+			if err := output.Write(cols); err != nil {
+				return err
+			}
+			headerWritten = true
+		}
+		passThrough := []string{}
+		for _, col := range cols {
+			passThrough = append(passThrough, line[col])
+		}
+		if err := output.Write(passThrough); err != nil {
+			return err
+		}
+
 		receipt.Headers = cols
 
 		for col, val := range line {
@@ -56,6 +76,8 @@ func main() {
 	}); err != nil {
 		log.Fatal(err)
 	}
+
+	output.Flush()
 
 	receipt.UniqueValues = map[string]int{}
 
