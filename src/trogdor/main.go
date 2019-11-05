@@ -87,7 +87,6 @@ func trogdor(input io.Reader, cols string, output *csv.Writer) error {
 		if err := output.Write(result); err != nil {
 			return err
 		}
-		output.Flush()
 	}
 
 	var cachedErr error
