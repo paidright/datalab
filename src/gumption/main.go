@@ -124,6 +124,10 @@ func main() {
 func gumption(input io.Reader, output csv.Writer, columns []string, flags map[string]flagval) error {
 	cachedHeaders := []string{}
 
+	for i, col := range columns {
+		columns[i] = strings.ReplaceAll(col, "GUMPTION_LITERAL_COMMA", ",")
+	}
+
 	alphas, err := regexp.Compile("[a-zA-Z]+")
 	if err != nil {
 		log.Fatal(err)

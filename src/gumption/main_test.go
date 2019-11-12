@@ -138,6 +138,18 @@ func TestGumption(t *testing.T) {
 		},
 		{
 			flags: map[string]flagval{
+				"rename": flagval{
+					active: true,
+					value:  "asd",
+				},
+			},
+			cols: []string{"somethingGUMPTION_LITERAL_COMMAelse"},
+			input: `"something,else",two
+123,abc`,
+			want: []string{"asd,two"},
+		},
+		{
+			flags: map[string]flagval{
 				"splitOnDelim": flagval{
 					active: true,
 					value:  "-",
