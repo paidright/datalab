@@ -32,6 +32,7 @@ var stompAlphas = flag.Bool("stomp-alphas", false, "Remove all alpha (A-Z,a-z) c
 var deleteWhere = flag.String("delete-where", "", "In any row where a cell matches X delete the row")
 var deleteWhereNot = flag.String("delete-where-not", "", "In any row where a cell does not match X delete the row")
 var trimWhitespace = flag.Bool("trim-whitespace", false, "Trim leading and trailing whitespace from cells in the target columns")
+var backToFront = flag.String("back-to-front", "", "If there is a trailing character that matches the value, move it to the front")
 
 var columns []string
 
@@ -110,6 +111,10 @@ func main() {
 		},
 		"trimWhitespace": flagval{
 			active: *trimWhitespace,
+		},
+		"backToFront": flagval{
+			active: *backToFront != "",
+			value:  *backToFront,
 		},
 	}
 
@@ -292,6 +297,13 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 
 			if flags["trimWhitespace"].active {
 				line.Data[col] = strings.Trim(line.Data[col], " ")
+			}
+
+			if flags["backToFront"].active {
+				lastChar := line.Data[col][len(line.Data[col])-1:]
+				if lastChar == flags["backToFront"].value {
+					line.Data[col] = flags["backToFront"].value + line.Data[col][:len(line.Data[col])-1]
+				}
 			}
 		}
 

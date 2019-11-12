@@ -185,3 +185,18 @@ one,two
 123,abc
 1 23,abc
 ```
+
+`--back-to-front`
+```
+one,two
+123-,abc
+1.23-,abc
+-1.45,abc
+```
+Becomes:
+```
+one,two
+-123,abc
+-1.23,abc
+-1.45,abc
+```

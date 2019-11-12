@@ -239,6 +239,20 @@ func TestGumption(t *testing.T) {
 		},
 		{
 			flags: map[string]flagval{
+				"backToFront": flagval{
+					active: true,
+					value:  "-",
+				},
+			},
+			cols: []string{"one"},
+			input: `one,two
+123-,abc
+1.23-,abc
+-1.45,abc`,
+			want: []string{"one,two", "-123,abc", "-1.23,abc", "-1.45,abc"},
+		},
+		{
+			flags: map[string]flagval{
 				"stripLeadingZeroes": flagval{
 					active: true,
 				},
