@@ -270,8 +270,6 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 			}
 
 			if flags["deleteWhere"].active {
-				log.Printf("DEBUG line.Data[col]: %+v \n", line.Data[col])
-				log.Printf("DEBUG flags[`deleteWhere`]: %+v \n", flags[`deleteWhere`])
 				if line.Data[col] == flags["deleteWhere"].value {
 					shouldDelete = true
 				}
