@@ -30,6 +30,7 @@ var cp = flag.Bool("copy", false, "Whether to copy the column(s)")
 var drop = flag.Bool("drop", false, "Whether to drop the column(s)")
 var stompAlphas = flag.Bool("stomp-alphas", false, "Remove all alpha (A-Z,a-z) characters")
 var deleteWhere = flag.String("delete-where", "", "In any row where a cell matches X delete the row")
+var deleteWhereNot = flag.String("delete-where-not", "", "In any row where a cell does not match X delete the row")
 var trimWhitespace = flag.Bool("trim-whitespace", false, "Trim leading and trailing whitespace from cells in the target columns")
 
 var columns []string
@@ -102,6 +103,10 @@ func main() {
 		"deleteWhere": flagval{
 			active: *deleteWhere != "",
 			value:  *deleteWhere,
+		},
+		"deleteWhereNot": flagval{
+			active: *deleteWhereNot != "",
+			value:  *deleteWhereNot,
 		},
 		"trimWhitespace": flagval{
 			active: *trimWhitespace,
@@ -275,6 +280,12 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 
 			if flags["deleteWhere"].active {
 				if line.Data[col] == flags["deleteWhere"].value {
+					shouldDelete = true
+				}
+			}
+
+			if flags["deleteWhereNot"].active {
+				if line.Data[col] != flags["deleteWhereNot"].value {
 					shouldDelete = true
 				}
 			}

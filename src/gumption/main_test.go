@@ -212,6 +212,21 @@ func TestGumption(t *testing.T) {
 		},
 		{
 			flags: map[string]flagval{
+				"deleteWhereNot": flagval{
+					active: true,
+					value:  "abc",
+				},
+			},
+			cols: []string{"three"},
+			input: `one,two,three
+123,1,abc
+123,a,xyz
+123,2,abc`,
+			want:         []string{"one,two,three", "123,1,abc", "123,2,abc"},
+			demandLength: 4,
+		},
+		{
+			flags: map[string]flagval{
 				"trimWhitespace": flagval{
 					active: true,
 				},
