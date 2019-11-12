@@ -157,3 +157,18 @@ one,two,three
 123,,xyz
 123,2,abc
 ```
+
+`--delete-where --columns three`
+```
+one,two,three
+123,1,abc
+123,a,xyz
+123,2,abc
+```
+
+Becomes:
+```
+one,two,three
+123,1,abc
+123,2,abc
+```

@@ -29,6 +29,7 @@ var splitOnDelim = flag.String("split", "", "Delimiter on which to split the col
 var cp = flag.Bool("copy", false, "Whether to copy the column(s)")
 var drop = flag.Bool("drop", false, "Whether to drop the column(s)")
 var stompAlphas = flag.Bool("stomp-alphas", false, "Remove all alpha (A-Z,a-z) characters")
+var deleteWhere = flag.String("delete-where", "", "In any row where a cell matches X delete the row")
 
 var columns []string
 
@@ -96,6 +97,10 @@ func main() {
 		},
 		"stompAlphas": flagval{
 			active: *stompAlphas,
+		},
+		"deleteWhere": flagval{
+			active: *deleteWhere != "",
+			value:  *deleteWhere,
 		},
 	}
 
@@ -193,6 +198,8 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 			return fmt.Errorf("Error handling headers %w", err)
 		}
 
+		shouldDelete := false
+
 		for _, col := range columns {
 			cell := line.Data[col]
 			if flags["stripLeadingZeroes"].active {
@@ -257,14 +264,24 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 			if flags["cp"].active {
 				line.Data[suffixed(col, columns, 1)] = cell
 			}
+
+			if flags["deleteWhere"].active {
+				log.Printf("DEBUG line.Data[col]: %+v \n", line.Data[col])
+				log.Printf("DEBUG flags[`deleteWhere`]: %+v \n", flags[`deleteWhere`])
+				if line.Data[col] == flags["deleteWhere"].value {
+					shouldDelete = true
+				}
+			}
 		}
 
 		newLine := []string{}
 		for _, header := range headers {
 			newLine = append(newLine, line.Data[header])
 		}
-		if err = output.Write(newLine); err != nil {
-			return err
+		if !shouldDelete {
+			if err = output.Write(newLine); err != nil {
+				return err
+			}
 		}
 		output.Flush()
 	}

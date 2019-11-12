@@ -9,10 +9,11 @@ import (
 )
 
 type test struct {
-	input string
-	flags map[string]flagval
-	cols  []string
-	want  []string
+	input        string
+	flags        map[string]flagval
+	cols         []string
+	want         []string
+	demandLength int
 }
 
 func TestGumption(t *testing.T) {
@@ -184,6 +185,21 @@ func TestGumption(t *testing.T) {
 		},
 		{
 			flags: map[string]flagval{
+				"deleteWhere": flagval{
+					active: true,
+					value:  "xyz",
+				},
+			},
+			cols: []string{"three"},
+			input: `one,two,three
+123,1,abc
+123,a,xyz
+123,2,abc`,
+			want:         []string{"one,two,three", "123,1,abc", "123,2,abc"},
+			demandLength: 4,
+		},
+		{
+			flags: map[string]flagval{
 				"stripLeadingZeroes": flagval{
 					active: true,
 				},
@@ -222,6 +238,9 @@ func TestGumption(t *testing.T) {
 
 		for _, ex := range tc.want {
 			assert.Contains(t, result.String(), ex)
+		}
+		if tc.demandLength != 0 {
+			assert.Equal(t, tc.demandLength, len(strings.Split(result.String(), "\n")))
 		}
 	}
 }
