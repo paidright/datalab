@@ -172,3 +172,16 @@ one,two,three
 123,1,abc
 123,2,abc
 ```
+
+`--trim-whitespace`
+```
+one,two
+ 123 ,abc
+1 23,abc
+```
+Becomes:
+```
+one,two
+123,abc
+1 23,abc
+```

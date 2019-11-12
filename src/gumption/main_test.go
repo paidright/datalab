@@ -212,6 +212,18 @@ func TestGumption(t *testing.T) {
 		},
 		{
 			flags: map[string]flagval{
+				"trimWhitespace": flagval{
+					active: true,
+				},
+			},
+			cols: []string{"one"},
+			input: `one,two
+ 123 ,abc
+1 23,abc`,
+			want: []string{"one,two", "123,abc", "1 23,abc"},
+		},
+		{
+			flags: map[string]flagval{
 				"stripLeadingZeroes": flagval{
 					active: true,
 				},
