@@ -186,7 +186,7 @@ one,two
 1 23,abc
 ```
 
-`--back-to-front`
+`--back-to-front -`
 ```
 one,two
 123-,abc
@@ -201,7 +201,7 @@ one,two
 -1.45,abc
 ```
 
-`--reformat-date`
+`--reformat-date MM.DD.YYYY,YYYY-MM-DD`
 ```
 one,two
 lolwut,hurr
