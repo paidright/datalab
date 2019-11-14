@@ -214,3 +214,6 @@ one,two
 lolwut,hurr
 2003-07-21,foo
 ```
+
+### Byte Order Marks
+[BOM](https://en.wikipedia.org/wiki/Byte_order_mark) characters are cheeky little invisible unicode characters that programs such as Excel like to insert in your CSV files. By default, Gumption drops them on the floor. This stops them from causing your column patterns not to match when you expect them to. You can toggle this behaviour off and leave BOM characters intact by setting the environment variable `NO_STRIP_BOM=true`

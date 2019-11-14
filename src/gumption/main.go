@@ -158,6 +158,12 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 			return cachedHeaders, nil
 		}
 
+		if os.Getenv("NO_STRIP_BOM") != "true" {
+			headers[0] = strings.TrimLeftFunc(headers[0], func(r rune) bool {
+				return r == '\uFEFF'
+			})
+		}
+
 		cachedHeaders = append([]string{}, headers...)
 
 		if len(columns) == 0 {
