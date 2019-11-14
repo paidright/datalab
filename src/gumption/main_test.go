@@ -248,8 +248,9 @@ func TestGumption(t *testing.T) {
 			input: `one,two
 123-,abc
 1.23-,abc
+,abc
 -1.45,abc`,
-			want: []string{"one,two", "-123,abc", "-1.23,abc", "-1.45,abc"},
+			want: []string{"one,two", "-123,abc", "-1.23,abc", ",abc", "-1.45,abc"},
 		},
 		{
 			flags: map[string]flagval{

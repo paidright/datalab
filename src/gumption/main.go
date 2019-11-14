@@ -300,9 +300,13 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 			}
 
 			if flags["backToFront"].active {
-				lastChar := line.Data[col][len(line.Data[col])-1:]
+				i := len(line.Data[col]) - 1
+				if i < 0 {
+					continue
+				}
+				lastChar := line.Data[col][i:]
 				if lastChar == flags["backToFront"].value {
-					line.Data[col] = flags["backToFront"].value + line.Data[col][:len(line.Data[col])-1]
+					line.Data[col] = flags["backToFront"].value + line.Data[col][:i]
 				}
 			}
 		}
