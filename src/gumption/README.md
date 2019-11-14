@@ -200,3 +200,17 @@ one,two
 -1.23,abc
 -1.45,abc
 ```
+
+`--reformat-date`
+```
+one,two
+lolwut,hurr
+21.07.2003,foo
+```
+
+Becomes:
+```
+one,two
+lolwut,hurr
+2003-07-21,foo
+```

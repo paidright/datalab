@@ -9,6 +9,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/paidright/datalab/util"
 )
@@ -33,6 +34,7 @@ var deleteWhere = flag.String("delete-where", "", "In any row where a cell match
 var deleteWhereNot = flag.String("delete-where-not", "", "In any row where a cell does not match X delete the row")
 var trimWhitespace = flag.Bool("trim-whitespace", false, "Trim leading and trailing whitespace from cells in the target columns")
 var backToFront = flag.String("back-to-front", "", "If there is a trailing character that matches the value, move it to the front")
+var reformatDate = flag.String("reformat-date", "", "Parse dates according to the input format and spit them into the output format. Ignore malformed dates.")
 
 var columns []string
 
@@ -115,6 +117,10 @@ func main() {
 		"backToFront": flagval{
 			active: *backToFront != "",
 			value:  *backToFront,
+		},
+		"reformatDate": flagval{
+			active: *reformatDate != "",
+			value:  *reformatDate,
 		},
 	}
 
@@ -307,6 +313,20 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 				lastChar := line.Data[col][i:]
 				if lastChar == flags["backToFront"].value {
 					line.Data[col] = flags["backToFront"].value + line.Data[col][:i]
+				}
+			}
+
+			if flags["reformatDate"].active {
+				format := strings.ReplaceAll(flags["reformatDate"].value, "YYYY", "2006")
+				format = strings.ReplaceAll(format, "MM", "01")
+				format = strings.ReplaceAll(format, "DD", "02")
+				inputLayout := strings.Split(format, ",")[0]
+				outputLayout := strings.Split(format, ",")[1]
+				t, err := time.Parse(inputLayout, line.Data[col])
+				if err != nil {
+					log.Println("WARN ignoring garbled date", line.Data[col])
+				} else {
+					line.Data[col] = t.Format(outputLayout)
 				}
 			}
 		}

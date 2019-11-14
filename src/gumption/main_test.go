@@ -254,6 +254,19 @@ func TestGumption(t *testing.T) {
 		},
 		{
 			flags: map[string]flagval{
+				"reformatDate": flagval{
+					active: true,
+					value:  "DD.MM.YYYY,YYYY-MM-DD",
+				},
+			},
+			cols: []string{"one"},
+			input: `one,two
+lolwut,hurr
+21.07.2003,foo`,
+			want: []string{"one,two", "lolwut,hurr", "2003-07-21,foo"},
+		},
+		{
+			flags: map[string]flagval{
 				"stripLeadingZeroes": flagval{
 					active: true,
 				},
