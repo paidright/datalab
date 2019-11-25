@@ -53,7 +53,9 @@ var logger = util.Logger{}
 
 func main() {
 	flag.Parse()
-	columns = strings.Split(*colsString, ",")
+	if *colsString != "" {
+		columns = strings.Split(*colsString, ",")
+	}
 
 	if *version {
 		logger.Info(currentVersion)
