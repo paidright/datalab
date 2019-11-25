@@ -35,7 +35,7 @@ func ReadSourceAsync(input io.Reader) (chan Line, chan error) {
 				break
 			}
 			if err != nil {
-				errors <- err
+				errors <- fmt.Errorf("record: %s - err: %w", record, err)
 				break
 			}
 

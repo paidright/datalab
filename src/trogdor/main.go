@@ -67,6 +67,14 @@ func trogdor(input io.Reader, cols string, output *csv.Writer) error {
 
 	work, errors := util.ReadSourceAsync(input)
 
+	var cachedErr error
+	go (func() {
+		for err := range errors {
+			log.Println("ERROR", err)
+			cachedErr = err
+		}
+	})()
+
 	for line := range work {
 		if _, err := processHeaders(line.Headers); err != nil {
 			return err
@@ -87,13 +95,6 @@ func trogdor(input io.Reader, cols string, output *csv.Writer) error {
 		if err := output.Write(result); err != nil {
 			return err
 		}
-	}
-
-	var cachedErr error
-
-	for err := range errors {
-		log.Println("ERROR", err)
-		cachedErr = err
 	}
 
 	return cachedErr

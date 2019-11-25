@@ -222,6 +222,14 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 
 	work, errors := util.ReadSourceAsync(input)
 
+	var cachedErr error
+	go (func() {
+		for err := range errors {
+			log.Println("ERROR", err)
+			cachedErr = err
+		}
+	})()
+
 	for line := range work {
 		headers, err := handleHeaders(line.Headers)
 		if err != nil {
@@ -347,13 +355,6 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 			}
 		}
 		output.Flush()
-	}
-
-	var cachedErr error
-
-	for err := range errors {
-		log.Println("ERROR", err)
-		cachedErr = err
 	}
 
 	return cachedErr

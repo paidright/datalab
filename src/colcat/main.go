@@ -80,6 +80,14 @@ func processFile(input io.Reader, targets []target, output csv.Writer) error {
 
 	work, errors := util.ReadSourceAsync(input)
 
+	var cachedErr error
+	go (func() {
+		for err := range errors {
+			log.Println("ERROR", err)
+			cachedErr = err
+		}
+	})()
+
 	for line := range work {
 		passthroughHeaders, err := handleHeaders(line.Headers)
 		if err != nil {
@@ -103,13 +111,6 @@ func processFile(input io.Reader, targets []target, output csv.Writer) error {
 		if err != nil {
 			return err
 		}
-	}
-
-	var cachedErr error
-
-	for err := range errors {
-		log.Println("ERROR", err)
-		cachedErr = err
 	}
 
 	return cachedErr

@@ -71,6 +71,14 @@ func processFile(file string, headers []string, output *csv.Writer) error {
 
 	mutex := sync.Mutex{}
 
+	var cachedErr error
+	go (func() {
+		for err := range errors {
+			log.Println("ERROR", err)
+			cachedErr = err
+		}
+	})()
+
 	workers := sync.WaitGroup{}
 	for _, _ = range make([]bool, runtime.GOMAXPROCS(0)) {
 		workers.Add(1)
@@ -102,13 +110,6 @@ func processFile(file string, headers []string, output *csv.Writer) error {
 
 	workers.Wait()
 	output.Flush()
-
-	var cachedErr error
-
-	for err := range errors {
-		log.Println("ERROR", err)
-		cachedErr = err
-	}
 
 	return cachedErr
 }

@@ -79,6 +79,14 @@ func join(key string, left io.Reader, right io.Reader, dest *csv.Writer) error {
 
 	work, errors := util.ReadSourceAsync(right)
 
+	var cachedErr error
+	go (func() {
+		for err := range errors {
+			log.Println("ERROR", err)
+			cachedErr = err
+		}
+	})()
+
 	for line := range work {
 		headers, err := handleHeaders(line.Headers)
 		if err != nil {
@@ -99,13 +107,6 @@ func join(key string, left io.Reader, right io.Reader, dest *csv.Writer) error {
 			return err
 		}
 		dest.Flush()
-	}
-
-	var cachedErr error
-
-	for err := range errors {
-		log.Println("ERROR", err)
-		cachedErr = err
 	}
 
 	return cachedErr
