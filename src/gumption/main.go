@@ -342,7 +342,7 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 				outputLayout := strings.Split(format, ",")[1]
 				t, err := time.Parse(inputLayout, line.Data[col])
 				if err != nil {
-					log.Println("WARN ignoring garbled date", line.Data[col])
+					log.Println("WARN ignoring garbled date", col, line.Data[col])
 				} else {
 					line.Data[col] = t.Format(outputLayout)
 				}
