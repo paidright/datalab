@@ -334,7 +334,9 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 
 			if flags["reformatDate"].active {
 				format := strings.ReplaceAll(flags["reformatDate"].value, "YYYY", "2006")
+				format = strings.ReplaceAll(format, "YY", "06")
 				format = strings.ReplaceAll(format, "MM", "01")
+				format = strings.ReplaceAll(format, "SHORTMONTH", "Jan")
 				format = strings.ReplaceAll(format, "DD", "02")
 				inputLayout := strings.Split(format, ",")[0]
 				outputLayout := strings.Split(format, ",")[1]

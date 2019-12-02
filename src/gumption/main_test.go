@@ -267,6 +267,32 @@ lolwut,hurr
 		},
 		{
 			flags: map[string]flagval{
+				"reformatDate": flagval{
+					active: true,
+					value:  "DD.SHORTMONTH.YYYY,YYYY-MM-DD",
+				},
+			},
+			cols: []string{"one"},
+			input: `one,two
+lolwut,hurr
+21.MAR.2003,foo`,
+			want: []string{"one,two", "lolwut,hurr", "2003-03-21,foo"},
+		},
+		{
+			flags: map[string]flagval{
+				"reformatDate": flagval{
+					active: true,
+					value:  "DD.SHORTMONTH.YY,YYYY-MM-DD",
+				},
+			},
+			cols: []string{"one"},
+			input: `one,two
+lolwut,hurr
+21.MAR.03,foo`,
+			want: []string{"one,two", "lolwut,hurr", "2003-03-21,foo"},
+		},
+		{
+			flags: map[string]flagval{
 				"stripLeadingZeroes": flagval{
 					active: true,
 				},
