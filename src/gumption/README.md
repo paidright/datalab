@@ -121,7 +121,7 @@ one,asd,one_1
 123,abc,456
 ```
 
-`--cp --columns one`
+`--copy --columns one`
 ```
 one,two
 123,abc
