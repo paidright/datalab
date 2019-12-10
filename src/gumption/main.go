@@ -35,6 +35,7 @@ var deleteWhereNot = flag.String("delete-where-not", "", "In any row where a cel
 var trimWhitespace = flag.Bool("trim-whitespace", false, "Trim leading and trailing whitespace from cells in the target columns")
 var backToFront = flag.String("back-to-front", "", "If there is a trailing character that matches the value, move it to the front")
 var reformatDate = flag.String("reformat-date", "", "Parse dates according to the input format and spit them into the output format. Ignore malformed dates.")
+var cleanCols = flag.Bool("clean-cols", false, "Remove common annoyances in column headers. See tests/README for details.")
 
 var columns []string
 
@@ -124,6 +125,9 @@ func main() {
 			active: *reformatDate != "",
 			value:  *reformatDate,
 		},
+		"cleanCols": flagval{
+			active: *cleanCols,
+		},
 	}
 
 	for k, flag := range flags {
@@ -169,7 +173,7 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 		cachedHeaders = append([]string{}, headers...)
 
 		if len(columns) == 0 {
-			columns = cachedHeaders
+			columns = append([]string{}, cachedHeaders...)
 		}
 
 		if flags["rename"].active {
@@ -214,6 +218,17 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 			cachedHeaders = newHeaders
 		}
 
+		if flags["cleanCols"].active {
+			for i, header := range cachedHeaders {
+				for _, col := range columns {
+					if col == header {
+						header = cleanCol(header)
+					}
+				}
+				cachedHeaders[i] = header
+			}
+		}
+
 		if err := output.Write(cachedHeaders); err != nil {
 			return []string{}, err
 		}
@@ -242,6 +257,9 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 
 		for _, col := range columns {
 			cell := line.Data[col]
+			if flags["cleanCols"].active {
+				col = cleanCol(col)
+			}
 			if flags["stripLeadingZeroes"].active {
 				cell = strings.TrimLeft(cell, "0")
 			}
@@ -392,6 +410,14 @@ func parseReplacements(input string) []replacement {
 		}
 	}
 	return replacements
+}
+
+func cleanCol(header string) string {
+	header = strings.ReplaceAll(header, ".", "_")
+	header = strings.ReplaceAll(header, "-", "_")
+	header = strings.Trim(header, " ")
+	header = strings.ReplaceAll(header, " ", "_")
+	return header
 }
 
 func logDone() {

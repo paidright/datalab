@@ -288,8 +288,23 @@ lolwut,hurr
 			cols: []string{"one"},
 			input: `one,two
 lolwut,hurr
+04.NOV.16,foo
 21.MAR.03,foo`,
-			want: []string{"one,two", "lolwut,hurr", "2003-03-21,foo"},
+			want: []string{"one,two", "lolwut,hurr", "2016-11-04,foo", "2003-03-21,foo"},
+		},
+		{
+			flags: map[string]flagval{
+				"cleanCols": flagval{
+					active: true,
+				},
+			},
+			cols: []string{},
+			input: `with space, and whitespace  ,got.dots,maybe-a-dash,  all.together-now
+lolwut,hurr,foo,bar,baz`,
+			want: []string{
+				"with_space,and_whitespace,got_dots,maybe_a_dash,all_together_now",
+				"lolwut,hurr,foo,bar,baz",
+			},
 		},
 		{
 			flags: map[string]flagval{
