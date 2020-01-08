@@ -158,7 +158,7 @@ one,two,three
 123,2,abc
 ```
 
-`--delete-where --columns three`
+`--delete-where xyz --columns three`
 ```
 one,two,three
 123,1,abc
@@ -171,6 +171,20 @@ Becomes:
 one,two,three
 123,1,abc
 123,2,abc
+```
+
+`--delete-where-not xyz --columns three`
+```
+one,two,three
+123,1,abc
+123,a,xyz
+123,2,abc
+```
+
+Becomes:
+```
+one,two,three
+123,a,xyz
 ```
 
 `--trim-whitespace`
