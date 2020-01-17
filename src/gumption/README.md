@@ -25,6 +25,17 @@ one,two
 123,abc
 ```
 
+`--left-pad 0,4`
+```
+one,two
+1,abc
+```
+Becomes:
+```
+one,two
+0001,abc
+```
+
 `--unquote`
 ```
 one,two
@@ -227,6 +238,18 @@ Becomes:
 one,two
 lolwut,hurr
 2003-07-21,foo
+```
+
+`--reformat-time HHMM,HH:MM`
+```
+one,two
+0830,foo
+```
+
+Becomes:
+```
+one,two
+08:30,foo
 ```
 
 `--clean-cols`

@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -19,6 +20,7 @@ var quiet = flag.Bool("quiet", false, "Tone down the output noise")
 var colsString = flag.String("columns", "", "A comma separated list of columns to target. Leaving this blank will operate on all columns")
 
 var stripLeadingZeroes = flag.Bool("strip-leading-zeroes", false, "Strip leading zeroes")
+var leftPad = flag.String("left-pad", "", "Left pad the column with a character to the specified width")
 var unquote = flag.Bool("unquote", false, "Strip quotation marks from strings")
 var commasToPoints = flag.Bool("commas-to-points", false, "Replace all commas with full stops")
 var addMissing = flag.String("add-missing", "", "String with which to replace blank fields")
@@ -35,6 +37,7 @@ var deleteWhereNot = flag.String("delete-where-not", "", "In any row where a cel
 var trimWhitespace = flag.Bool("trim-whitespace", false, "Trim leading and trailing whitespace from cells in the target columns")
 var backToFront = flag.String("back-to-front", "", "If there is a trailing character that matches the value, move it to the front")
 var reformatDate = flag.String("reformat-date", "", "Parse dates according to the input format and spit them into the output format. Ignore malformed dates.")
+var reformatTime = flag.String("reformat-time", "", "Parse times according to the input format and spit them into the output format. Ignore malformed times.")
 var cleanCols = flag.Bool("clean-cols", false, "Remove common annoyances in column headers. See tests/README for details.")
 
 var columns []string
@@ -66,6 +69,10 @@ func main() {
 	flags := map[string]flagval{
 		"stripLeadingZeroes": flagval{
 			active: *stripLeadingZeroes,
+		},
+		"leftPad": flagval{
+			active: *leftPad != "",
+			value:  *leftPad,
 		},
 		"unquote": flagval{
 			active: *unquote,
@@ -124,6 +131,10 @@ func main() {
 		"reformatDate": flagval{
 			active: *reformatDate != "",
 			value:  *reformatDate,
+		},
+		"reformatTime": flagval{
+			active: *reformatTime != "",
+			value:  *reformatTime,
 		},
 		"cleanCols": flagval{
 			active: *cleanCols,
@@ -264,6 +275,20 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 				cell = strings.TrimLeft(cell, "0")
 			}
 
+			if flags["leftPad"].active {
+				parts := strings.Split(flags["leftPad"].value, ",")
+				pad := parts[0]
+				length, err := strconv.Atoi(parts[1])
+
+				if err != nil {
+					log.Println("WARN ignoring garbled cell", col, line.Data[col])
+				} else {
+					for i := len(cell); i < length; i++ {
+						cell = pad + cell
+					}
+				}
+			}
+
 			if flags["unquote"].active {
 				cell = strings.Trim(cell, `"`)
 				cell = strings.Trim(cell, `'`)
@@ -361,6 +386,22 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 				t, err := time.Parse(inputLayout, line.Data[col])
 				if err != nil {
 					log.Println("WARN ignoring garbled date", col, line.Data[col])
+				} else {
+					line.Data[col] = t.Format(outputLayout)
+				}
+			}
+
+			if flags["reformatTime"].active {
+				format := strings.ReplaceAll(flags["reformatTime"].value, "HH", "15")
+				format = strings.ReplaceAll(format, "MM", "04")
+				format = strings.ReplaceAll(format, "SS", "05")
+
+				inputLayout := strings.Split(format, ",")[0]
+				outputLayout := strings.Split(format, ",")[1]
+
+				t, err := time.Parse(inputLayout, line.Data[col])
+				if err != nil {
+					log.Println("WARN ignoring garbled time", col, line.Data[col])
 				} else {
 					line.Data[col] = t.Format(outputLayout)
 				}
