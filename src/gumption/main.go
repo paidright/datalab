@@ -37,6 +37,7 @@ var deleteWhereNot = flag.String("delete-where-not", "", "In any row where a cel
 var trimWhitespace = flag.Bool("trim-whitespace", false, "Trim leading and trailing whitespace from cells in the target columns")
 var backToFront = flag.String("back-to-front", "", "If there is a trailing character that matches the value, move it to the front")
 var reformatDate = flag.String("reformat-date", "", "Parse dates according to the input format and spit them into the output format. Ignore malformed dates.")
+var reformatTime = flag.String("reformat-time", "", "Parse times according to the input format and spit them into the output format. Ignore malformed times.")
 var cleanCols = flag.Bool("clean-cols", false, "Remove common annoyances in column headers. See tests/README for details.")
 
 var columns []string
@@ -130,6 +131,10 @@ func main() {
 		"reformatDate": flagval{
 			active: *reformatDate != "",
 			value:  *reformatDate,
+		},
+		"reformatTime": flagval{
+			active: *reformatTime != "",
+			value:  *reformatTime,
 		},
 		"cleanCols": flagval{
 			active: *cleanCols,
@@ -276,11 +281,11 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 				length, err := strconv.Atoi(parts[1])
 
 				if err != nil {
-					panic(err)
-				}
-
-				for i := len(cell); i < length; i++ {
-					cell = pad + cell
+					log.Println("WARN ignoring garbled cell", col, line.Data[col])
+				} else {
+					for i := len(cell); i < length; i++ {
+						cell = pad + cell
+					}
 				}
 			}
 
@@ -381,6 +386,22 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 				t, err := time.Parse(inputLayout, line.Data[col])
 				if err != nil {
 					log.Println("WARN ignoring garbled date", col, line.Data[col])
+				} else {
+					line.Data[col] = t.Format(outputLayout)
+				}
+			}
+
+			if flags["reformatTime"].active {
+				format := strings.ReplaceAll(flags["reformatTime"].value, "HH", "15")
+				format = strings.ReplaceAll(format, "MM", "04")
+				format = strings.ReplaceAll(format, "SS", "05")
+
+				inputLayout := strings.Split(format, ",")[0]
+				outputLayout := strings.Split(format, ",")[1]
+
+				t, err := time.Parse(inputLayout, line.Data[col])
+				if err != nil {
+					log.Println("WARN ignoring garbled time", col, line.Data[col])
 				} else {
 					line.Data[col] = t.Format(outputLayout)
 				}

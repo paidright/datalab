@@ -349,6 +349,18 @@ lolwut,hurr,foo,bar,baz`,
 				"1111,11",
 			},
 		},
+		{
+			flags: map[string]flagval{
+				"reformatTime": flagval{
+					active: true,
+					value:  "HHMM,HH:MM",
+				},
+			},
+			cols: []string{"one"},
+			input: `one,two
+0830,foo`,
+			want: []string{"one,two", "08:30,foo"},
+		},
 	}
 
 	for _, tc := range tests {

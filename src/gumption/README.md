@@ -240,6 +240,18 @@ lolwut,hurr
 2003-07-21,foo
 ```
 
+`--reformat-time HHMM,HH:MM`
+```
+one,two
+0830,foo
+```
+
+Becomes:
+```
+one,two
+08:30,foo
+```
+
 `--clean-cols`
 ```
 with space, and whitespace  ,got.dots,maybe-a-dash,  all.together-now
