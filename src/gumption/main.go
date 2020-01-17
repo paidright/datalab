@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -19,6 +20,7 @@ var quiet = flag.Bool("quiet", false, "Tone down the output noise")
 var colsString = flag.String("columns", "", "A comma separated list of columns to target. Leaving this blank will operate on all columns")
 
 var stripLeadingZeroes = flag.Bool("strip-leading-zeroes", false, "Strip leading zeroes")
+var leftPad = flag.String("left-pad", "", "Left pad the column with a character to the specified width")
 var unquote = flag.Bool("unquote", false, "Strip quotation marks from strings")
 var commasToPoints = flag.Bool("commas-to-points", false, "Replace all commas with full stops")
 var addMissing = flag.String("add-missing", "", "String with which to replace blank fields")
@@ -66,6 +68,10 @@ func main() {
 	flags := map[string]flagval{
 		"stripLeadingZeroes": flagval{
 			active: *stripLeadingZeroes,
+		},
+		"leftPad": flagval{
+			active: *leftPad != "",
+			value:  *leftPad,
 		},
 		"unquote": flagval{
 			active: *unquote,
@@ -262,6 +268,20 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 			}
 			if flags["stripLeadingZeroes"].active {
 				cell = strings.TrimLeft(cell, "0")
+			}
+
+			if flags["leftPad"].active {
+				parts := strings.Split(flags["leftPad"].value, ",")
+				pad := parts[0]
+				length, err := strconv.Atoi(parts[1])
+
+				if err != nil {
+					panic(err)
+				}
+
+				for i := len(cell); i < length; i++ {
+					cell = pad + cell
+				}
 			}
 
 			if flags["unquote"].active {

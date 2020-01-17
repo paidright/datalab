@@ -333,6 +333,22 @@ lolwut,hurr,foo,bar,baz`,
 				`1.23,abc,3,456`,
 			},
 		},
+		{
+			flags: map[string]flagval{
+				"leftPad": flagval{
+					active: true,
+					value:  "0,4",
+				},
+			},
+			cols:  []string{"one"},
+			input: "one,two\n1,1\n11,1\n1111,11",
+			want: []string{
+				"one,two",
+				"0001,1",
+				"0011,1",
+				"1111,11",
+			},
+		},
 	}
 
 	for _, tc := range tests {

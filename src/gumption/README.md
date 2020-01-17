@@ -25,6 +25,17 @@ one,two
 123,abc
 ```
 
+`--left-pad 0,4`
+```
+one,two
+1,abc
+```
+Becomes:
+```
+one,two
+0001,abc
+```
+
 `--unquote`
 ```
 one,two
