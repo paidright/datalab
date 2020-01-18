@@ -38,7 +38,6 @@ var trimWhitespace = flag.Bool("trim-whitespace", false, "Trim leading and trail
 var backToFront = flag.String("back-to-front", "", "If there is a trailing character that matches the value, move it to the front")
 var reformatDate = flag.String("reformat-date", "", "Parse dates according to the input format and spit them into the output format. Ignore malformed dates.")
 var reformatTime = flag.String("reformat-time", "", "Parse times according to the input format and spit them into the output format. Ignore malformed times.")
-var reformatDateTime = flag.String("reformat-datetime", "", "Parse datetimes according to the input format and spit them into the output format. Ignore malformed dates.")
 var cleanCols = flag.Bool("clean-cols", false, "Remove common annoyances in column headers. See tests/README for details.")
 
 var columns []string
@@ -386,8 +385,17 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 				format = strings.ReplaceAll(format, "MM", "01")
 				format = strings.ReplaceAll(format, "SHORTMONTH", "Jan")
 				format = strings.ReplaceAll(format, "DD", "02")
+
+				// hours
+				format = strings.ReplaceAll(format, "hh", "15")
+				// minutes
+				format = strings.ReplaceAll(format, "mm", "04")
+				// seconds
+				format = strings.ReplaceAll(format, "ss", "05")
+
 				inputLayout := strings.Split(format, ",")[0]
 				outputLayout := strings.Split(format, ",")[1]
+
 				t, err := time.Parse(inputLayout, line.Data[col])
 				if err != nil {
 					log.Println("WARN ignoring garbled date", col, line.Data[col])
@@ -407,31 +415,6 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 				t, err := time.Parse(inputLayout, line.Data[col])
 				if err != nil {
 					log.Println("WARN ignoring garbled time", col, line.Data[col])
-				} else {
-					line.Data[col] = t.Format(outputLayout)
-				}
-			}
-
-			if flags["reformatDateTime"].active {
-				// year
-				format := strings.ReplaceAll(flags["reformatDateTime"].value, "YYYY", "2006")
-				// month
-				format = strings.ReplaceAll(format, "MM", "01")
-				// day
-				format = strings.ReplaceAll(format, "DD", "02")
-				// hours
-				format = strings.ReplaceAll(format, "hh", "15")
-				// minutes
-				format = strings.ReplaceAll(format, "mm", "04")
-				// seconds
-				format = strings.ReplaceAll(format, "ss", "05")
-
-				inputLayout := strings.Split(format, ",")[0]
-				outputLayout := strings.Split(format, ",")[1]
-
-				t, err := time.Parse(inputLayout, line.Data[col])
-				if err != nil {
-					log.Println("WARN ignoring garbled datetime", col, line.Data[col])
 				} else {
 					line.Data[col] = t.Format(outputLayout)
 				}

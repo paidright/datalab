@@ -363,7 +363,7 @@ lolwut,hurr,foo,bar,baz`,
 		},
 		{
 			flags: map[string]flagval{
-				"reformatDateTime": flagval{
+				"reformatDate": flagval{
 					active: true,
 					value:  "YYYYMMDDhhmmss,YYYY-MM-DD hh:mm:ss",
 				},
