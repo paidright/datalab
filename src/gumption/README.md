@@ -252,6 +252,18 @@ one,two
 08:30,foo
 ```
 
+`--reformat-datetime "YYYYMMDDhhmmss,YYYY-MM-DD hh:mm:ss"`
+```
+one,two
+20150629083000,foo
+```
+
+Becomes:
+```
+one,two
+2015-06-29 08:30:00,foo
+```
+
 `--clean-cols`
 ```
 with space, and whitespace  ,got.dots,maybe-a-dash,  all.together-now
