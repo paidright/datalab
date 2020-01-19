@@ -361,6 +361,18 @@ lolwut,hurr,foo,bar,baz`,
 0830,foo`,
 			want: []string{"one,two", "08:30,foo"},
 		},
+		{
+			flags: map[string]flagval{
+				"reformatDate": flagval{
+					active: true,
+					value:  "YYYYMMDDhhmmss,YYYY-MM-DD hh:mm:ss",
+				},
+			},
+			cols: []string{"one"},
+			input: `one,two
+20150629083000,foo`,
+			want: []string{"one,two", "2015-06-29 08:30:00,foo"},
+		},
 	}
 
 	for _, tc := range tests {

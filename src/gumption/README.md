@@ -240,6 +240,18 @@ lolwut,hurr
 2003-07-21,foo
 ```
 
+`--reformat-date "YYYYMMDDhhmmss,YYYY-MM-DD hh:mm:ss"`
+```
+one,two
+20150629083000,foo
+```
+
+Becomes:
+```
+one,two
+2015-06-29 08:30:00,foo
+```
+
 `--reformat-time HHMM,HH:MM`
 ```
 one,two

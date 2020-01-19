@@ -136,6 +136,10 @@ func main() {
 			active: *reformatTime != "",
 			value:  *reformatTime,
 		},
+		"reformatDateTime": flagval{
+			active: *reformatDate != "",
+			value:  *reformatDate,
+		},
 		"cleanCols": flagval{
 			active: *cleanCols,
 		},
@@ -381,8 +385,17 @@ func gumption(input io.Reader, output csv.Writer, columns []string, flags map[st
 				format = strings.ReplaceAll(format, "MM", "01")
 				format = strings.ReplaceAll(format, "SHORTMONTH", "Jan")
 				format = strings.ReplaceAll(format, "DD", "02")
+
+				// hours
+				format = strings.ReplaceAll(format, "hh", "15")
+				// minutes
+				format = strings.ReplaceAll(format, "mm", "04")
+				// seconds
+				format = strings.ReplaceAll(format, "ss", "05")
+
 				inputLayout := strings.Split(format, ",")[0]
 				outputLayout := strings.Split(format, ",")[1]
+
 				t, err := time.Parse(inputLayout, line.Data[col])
 				if err != nil {
 					log.Println("WARN ignoring garbled date", col, line.Data[col])
