@@ -33,6 +33,7 @@ dist: clean dist/github.com/paidright/datalab/sort_csv
 		cd $$GOPATH/src/$$dir && make version.go && cd ../..; \
 		echo building $$dir; \
 		packr2 build -o ./dist/`echo $$dir | sed s/src//` $$dir; \
+		GOOS=darwin GOARCH=amd64 packr2 build -o ./dist/`echo $$dir | sed s/src//`-mac $$dir; \
 	done
 
 docker_image_build: build
