@@ -8,7 +8,7 @@ Marx takes a set of CSV files in a directory and creates a union (geddit?) of th
 
 By default it will slurp up all csv files in the current working directory and emit the output to stdout. You can overwrite these defaults with flags if you like:
 
-Note that if you try and pipe to a file in the cwd Marx will try and union the output file, fail, and exit immediately.
+Note that if you try and pipe to a file in the input directory Marx will try and union the output file, fail, and exit immediately.
 
 ```
 ./marx --input . > ./output/output.csv
