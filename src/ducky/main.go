@@ -13,8 +13,8 @@ import (
 var version = flag.Bool("version", false, "Just print the version and exit")
 var quiet = flag.Bool("quiet", false, "Tone down the output noise")
 var matchInput = flag.String("match", "", "A comma separated list of columns to match on. eg: id:id,end:start")
-var literalLeftMatchInput = flag.String("match-left-literal", "", "A comma separated list values to match the left branch on. eg: paycode:salary")
-var literalRightMatchInput = flag.String("match-right-literal", "", "A comma separated list values to match the right branch on. eg: paycode:extra_hours")
+var literalLeftMatchInput = flag.String("match-literal-left", "", "A comma separated list values to match the left branch on. eg: paycode:salary")
+var literalRightMatchInput = flag.String("match-literal-right", "", "A comma separated list values to match the right branch on. eg: paycode:extra_hours")
 
 var logger = util.Logger{}
 
