@@ -21,9 +21,11 @@ test:
 clean:
 	-rm -r dist/github.com/paidright/datalab/*
 
-dist/github.com/paidright/datalab/sort_csv: ./sort_csv.sh
+dist/github.com/paidright/datalab/sort_csv: ./sort_csv.sh ./sort_csv_asc.sh ./sort_csv_desc.sh
 	-mkdir -p ./dist/github.com/paidright/datalab
 	cp sort_csv.sh dist/github.com/paidright/datalab/sort_csv
+	cp sort_csv_asc.sh dist/github.com/paidright/datalab/sort_csv_asc
+	cp sort_csv_desc.sh dist/github.com/paidright/datalab/sort_csv_desc
 
 dist: clean dist/github.com/paidright/datalab/sort_csv
 	echo $(TOOLS)
