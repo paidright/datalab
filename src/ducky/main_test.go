@@ -101,6 +101,62 @@ one,2pm,5pm
 				"one,2pm,5pm,false",
 			},
 		},
+		{
+			input: `id,paycode,start,end
+one,foo,9am,11am
+one,bar,11am,5pm
+one,baz,9am,11am
+one,quux,11am,5pm
+`,
+			matchOn: []matchSet{
+				matchSet{
+					Left:  "id",
+					Right: "id",
+				},
+				matchSet{
+					Left:  "end",
+					Right: "start",
+				},
+				matchSet{
+					LiteralRight: true,
+					Left:         "paycode",
+					Right:        "bar",
+				},
+			},
+			want: []string{
+				"one,bar,9am,5pm,true",
+				"one,baz,9am,11am,false",
+				"one,quux,11am,5pm,false",
+			},
+		},
+		{
+			input: `id,paycode,start,end
+one,foo,9am,11am
+one,bar,11am,5pm
+one,baz,9am,11am
+one,quux,11am,5pm
+`,
+			matchOn: []matchSet{
+				matchSet{
+					Left:  "id",
+					Right: "id",
+				},
+				matchSet{
+					Left:  "end",
+					Right: "start",
+				},
+				matchSet{
+					LiteralLeft: true,
+					Left:        "paycode",
+					Right:       "foo",
+				},
+			},
+			want: []string{
+				"one,bar,9am,5pm,true",
+				"one,baz,9am,11am,false",
+				"one,quux,11am,5pm,false",
+			},
+		},
 	}
 
 	for _, tc := range tests {

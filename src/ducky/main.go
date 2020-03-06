@@ -13,6 +13,8 @@ import (
 var version = flag.Bool("version", false, "Just print the version and exit")
 var quiet = flag.Bool("quiet", false, "Tone down the output noise")
 var matchInput = flag.String("match", "", "A comma separated list of columns to match on. eg: id:id,end:start")
+var literalLeftMatchInput = flag.String("match-left-literal", "", "A comma separated list values to match the left branch on. eg: paycode:salary")
+var literalRightMatchInput = flag.String("match-right-literal", "", "A comma separated list values to match the right branch on. eg: paycode:extra_hours")
 
 var logger = util.Logger{}
 
@@ -36,6 +38,32 @@ func main() {
 			matchOn = append(matchOn, matchSet{
 				Left:  bits[0],
 				Right: bits[1],
+			})
+		}
+	}
+
+	if *literalLeftMatchInput != "" {
+		columns := strings.Split(*literalLeftMatchInput, ",")
+		for _, set := range columns {
+			bits := strings.Split(set, ":")
+
+			matchOn = append(matchOn, matchSet{
+				LiteralLeft: true,
+				Left:        bits[0],
+				Right:       bits[1],
+			})
+		}
+	}
+
+	if *literalRightMatchInput != "" {
+		columns := strings.Split(*literalRightMatchInput, ",")
+		for _, set := range columns {
+			bits := strings.Split(set, ":")
+
+			matchOn = append(matchOn, matchSet{
+				LiteralRight: true,
+				Left:         bits[0],
+				Right:        bits[1],
 			})
 		}
 	}
@@ -82,8 +110,18 @@ func ducky(input io.Reader, output csv.Writer, matchOn []matchSet) error {
 
 		numMatches := 0
 		for _, match := range matchOn {
-			if prevLine.Data[match.Left] == line.Data[match.Right] {
-				numMatches += 1
+			if match.LiteralRight {
+				if line.Data[match.Left] == match.Right {
+					numMatches += 1
+				}
+			} else if match.LiteralLeft {
+				if prevLine.Data[match.Left] == match.Right {
+					numMatches += 1
+				}
+			} else {
+				if prevLine.Data[match.Left] == line.Data[match.Right] {
+					numMatches += 1
+				}
 			}
 		}
 
@@ -118,8 +156,10 @@ func emitLine(line util.Line, output *csv.Writer) error {
 }
 
 type matchSet struct {
-	Left  string
-	Right string
+	Left         string
+	LiteralLeft  bool
+	Right        string
+	LiteralRight bool
 }
 
 func logDone() {

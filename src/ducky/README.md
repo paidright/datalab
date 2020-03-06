@@ -62,3 +62,40 @@ Becomes
 id,start,end,ducky_taped
 one,9am,5pm,true
 ```
+
+You can also specify that a column must match a literal value.
+
+input.csv
+```
+id,paycode,start,end
+one,foo,9am,11am
+one,bar,11am,5pm
+one,baz,9am,11am
+one,quux,11am,5pm
+```
+
+ducky --match "id:id,end:start" --match-literal-right "paycode:bar"
+
+Becomes
+```
+one,bar,9am,5pm,true
+one,baz,9am,11am,false
+one,quux,11am,5pm,false
+```
+
+input.csv
+```
+one,foo,9am,11am
+one,bar,11am,5pm
+one,baz,9am,11am
+one,quux,11am,5pm
+```
+
+ducky --match "id:id,end:start" --match-literal-left "paycode:foo"
+
+Becomes
+```
+one,bar,9am,5pm,true
+one,baz,9am,11am,false
+one,quux,11am,5pm,false
+```
