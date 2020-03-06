@@ -19,9 +19,9 @@ ducky --match "id:id,end:start" < input.csv
 
 Becomes
 ```
-id,start,end
-one,9am,5pm
-two,9am,5pm
+id,start,end,ducky_taped
+one,9am,5pm,true
+two,9am,5pm,true
 ```
 
 Ducky expects input to be sorted and will only merge adjacent rows.
@@ -39,10 +39,10 @@ ducky --match "id:id,end:start" < input.csv
 
 Becomes
 ```
-id,start,end
-one,9am,2pm
-beep,bonk,bork
-one,2pm,5pm
+id,start,end,ducky_taped
+one,9am,2pm,true
+beep,bonk,bork,false
+one,2pm,5pm,false
 ```
 
 If multiple adjacent lines result in a match, they will all be merged together.
@@ -59,6 +59,6 @@ ducky --match "id:id,end:start" < input.csv
 
 Becomes
 ```
-id,start,end
-one,9am,5pm
+id,start,end,ducky_taped
+one,9am,5pm,true
 ```

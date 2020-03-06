@@ -33,7 +33,7 @@ one,11am,5pm
 				},
 			},
 			want: []string{
-				"one,9am,5pm",
+				"one,9am,5pm,true",
 			},
 		},
 		{
@@ -54,8 +54,8 @@ two,11am,5pm
 				},
 			},
 			want: []string{
-				"one,9am,5pm",
-				"two,9am,5pm",
+				"one,9am,5pm,true",
+				"two,9am,5pm,true",
 			},
 		},
 		{
@@ -75,7 +75,7 @@ one,2pm,5pm
 				},
 			},
 			want: []string{
-				"one,9am,5pm",
+				"one,9am,5pm,true",
 			},
 		},
 		{
@@ -96,9 +96,9 @@ one,2pm,5pm
 				},
 			},
 			want: []string{
-				"one,9am,2pm",
-				"beep,bonk,bork",
-				"one,2pm,5pm",
+				"one,9am,2pm,true",
+				"beep,bonk,bork,false",
+				"one,2pm,5pm,false",
 			},
 		},
 	}
