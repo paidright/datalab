@@ -93,8 +93,10 @@ func ducky(input io.Reader, output csv.Writer, matchOn []matchSet) error {
 	prevLine := util.Line{}
 
 	for line := range work {
-		line.Headers = append(line.Headers, "ducky_taped")
-		line.Data["ducky_taped"] = "false"
+		if _, ok := line.Data["ducky_taped"]; !ok {
+			line.Headers = append(line.Headers, "ducky_taped")
+			line.Data["ducky_taped"] = "false"
+		}
 
 		if !headersPrinted {
 			if err := output.Write(line.Headers); err != nil {

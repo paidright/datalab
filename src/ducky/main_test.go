@@ -157,6 +157,29 @@ one,quux,11am,5pm
 				"one,quux,11am,5pm,false",
 			},
 		},
+		{
+			input: `id,start,end,ducky_taped
+one,9am,11am,true
+one,11am,5pm,false
+two,9am,10am,false
+two,11am,5pm,false
+`,
+			matchOn: []matchSet{
+				matchSet{
+					Left:  "id",
+					Right: "id",
+				},
+				matchSet{
+					Left:  "end",
+					Right: "start",
+				},
+			},
+			want: []string{
+				"one,9am,5pm,true",
+				"two,9am,10am,false",
+				"two,11am,5pm,false",
+			},
+		},
 	}
 
 	for _, tc := range tests {
