@@ -13,8 +13,11 @@ import (
 var version = flag.Bool("version", false, "Just print the version and exit")
 var quiet = flag.Bool("quiet", false, "Tone down the output noise")
 var matchInput = flag.String("match", "", "A comma separated list of columns to match on. eg: id:id,end:start")
+var inverseMatchInput = flag.String("inverse-match", "", "A comma separated list of columns to inverse match on. eg: id:id,end:start")
 var literalLeftMatchInput = flag.String("match-literal-left", "", "A comma separated list values to match the left branch on. eg: paycode:salary")
 var literalRightMatchInput = flag.String("match-literal-right", "", "A comma separated list values to match the right branch on. eg: paycode:extra_hours")
+var inverseLiteralLeftMatchInput = flag.String("inverse-match-literal-left", "", "A comma separated list values to inverse match the left branch on. eg: paycode:salary")
+var inverseLiteralRightMatchInput = flag.String("inverse-match-literal-right", "", "A comma separated list values to inverse match the right branch on. eg: paycode:extra_hours")
 
 var logger = util.Logger{}
 
@@ -42,6 +45,19 @@ func main() {
 		}
 	}
 
+	if *inverseMatchInput != "" {
+		columns := strings.Split(*inverseMatchInput, ",")
+		for _, set := range columns {
+			bits := strings.Split(set, ":")
+
+			matchOn = append(matchOn, matchSet{
+				Inverse: true,
+				Left:    bits[0],
+				Right:   bits[1],
+			})
+		}
+	}
+
 	if *literalLeftMatchInput != "" {
 		columns := strings.Split(*literalLeftMatchInput, ",")
 		for _, set := range columns {
@@ -61,6 +77,34 @@ func main() {
 			bits := strings.Split(set, ":")
 
 			matchOn = append(matchOn, matchSet{
+				LiteralRight: true,
+				Left:         bits[0],
+				Right:        bits[1],
+			})
+		}
+	}
+
+	if *inverseLiteralLeftMatchInput != "" {
+		columns := strings.Split(*inverseLiteralLeftMatchInput, ",")
+		for _, set := range columns {
+			bits := strings.Split(set, ":")
+
+			matchOn = append(matchOn, matchSet{
+				Inverse:     true,
+				LiteralLeft: true,
+				Left:        bits[0],
+				Right:       bits[1],
+			})
+		}
+	}
+
+	if *inverseLiteralRightMatchInput != "" {
+		columns := strings.Split(*inverseLiteralRightMatchInput, ",")
+		for _, set := range columns {
+			bits := strings.Split(set, ":")
+
+			matchOn = append(matchOn, matchSet{
+				Inverse:      true,
 				LiteralRight: true,
 				Left:         bits[0],
 				Right:        bits[1],
@@ -112,18 +156,37 @@ func ducky(input io.Reader, output csv.Writer, matchOn []matchSet) error {
 
 		numMatches := 0
 		for _, match := range matchOn {
+			matched := false
+
 			if match.LiteralRight {
 				if line.Data[match.Left] == match.Right {
-					numMatches += 1
+					if match.Inverse {
+						continue
+					}
+					matched = true
 				}
 			} else if match.LiteralLeft {
 				if prevLine.Data[match.Left] == match.Right {
-					numMatches += 1
+					if match.Inverse {
+						continue
+					}
+					matched = true
 				}
 			} else {
 				if prevLine.Data[match.Left] == line.Data[match.Right] {
-					numMatches += 1
+					if match.Inverse {
+						continue
+					}
+					matched = true
 				}
+			}
+
+			if match.Inverse && !matched {
+				matched = true
+			}
+
+			if matched {
+				numMatches += 1
 			}
 		}
 
@@ -162,6 +225,7 @@ type matchSet struct {
 	LiteralLeft  bool
 	Right        string
 	LiteralRight bool
+	Inverse      bool
 }
 
 func logDone() {

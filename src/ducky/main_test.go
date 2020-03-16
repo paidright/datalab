@@ -180,6 +180,59 @@ two,11am,5pm,false
 				"two,11am,5pm,false",
 			},
 		},
+		{
+			input: `id,start,end
+one,9am,11am
+one,11am,5pm
+two,9am,11am
+two,11am,never
+`,
+			matchOn: []matchSet{
+				matchSet{
+					Left:  "id",
+					Right: "id",
+				},
+				matchSet{
+					Left:  "end",
+					Right: "start",
+				},
+				matchSet{
+					Inverse:      true,
+					LiteralRight: true,
+					Left:         "end",
+					Right:        "never",
+				},
+			},
+			want: []string{
+				"one,9am,5pm,true",
+				"two,9am,11am,false",
+				"two,11am,never,false",
+			},
+		},
+		{
+			input: `id,start,end
+one,9am,11am
+one,12am,5pm
+two,9am,11am
+two,11am,5pm
+`,
+			matchOn: []matchSet{
+				matchSet{
+					Left:  "id",
+					Right: "id",
+				},
+				matchSet{
+					Inverse: true,
+					Left:    "end",
+					Right:   "start",
+				},
+			},
+			want: []string{
+				"one,9am,5pm,true",
+				"two,9am,11am,false",
+				"two,11am,5pm,false",
+			},
+		},
 	}
 
 	for _, tc := range tests {

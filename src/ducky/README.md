@@ -85,6 +85,7 @@ one,quux,11am,5pm,false
 
 input.csv
 ```
+id,paycode,start,end
 one,foo,9am,11am
 one,bar,11am,5pm
 one,baz,9am,11am
@@ -98,4 +99,42 @@ Becomes
 one,bar,9am,5pm,true
 one,baz,9am,11am,false
 one,quux,11am,5pm,false
+```
+
+input.csv
+```
+id,start,end
+one,9am,11am
+one,12am,5pm
+two,9am,11am
+two,11am,5pm
+```
+
+ducky --match "id:id" --inverse-match "end:start"
+
+Becomes
+```
+id,start,end
+one,9am,5pm,true
+two,9am,11am,false
+two,11am,5pm,false
+```
+
+input.csv
+```
+id,start,end
+one,9am,11am
+one,11am,5pm
+two,9am,11am
+two,11am,never
+```
+
+ducky --match "id:id,end:start" --inverse-match-literal-right "end:never"
+
+Becomes
+```
+id,start,end
+one,9am,5pm,true
+two,9am,11am,false
+two,11am,never,false
 ```
