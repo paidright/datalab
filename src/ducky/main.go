@@ -36,7 +36,7 @@ func main() {
 	if *matchInput != "" {
 		columns := strings.Split(*matchInput, ",")
 		for _, set := range columns {
-			bits := strings.Split(set, ":")
+			bits := strings.SplitN(set, ":", 2)
 
 			matchOn = append(matchOn, matchSet{
 				Left:  bits[0],
@@ -48,7 +48,7 @@ func main() {
 	if *inverseMatchInput != "" {
 		columns := strings.Split(*inverseMatchInput, ",")
 		for _, set := range columns {
-			bits := strings.Split(set, ":")
+			bits := strings.SplitN(set, ":", 2)
 
 			matchOn = append(matchOn, matchSet{
 				Inverse: true,
@@ -61,7 +61,7 @@ func main() {
 	if *literalLeftMatchInput != "" {
 		columns := strings.Split(*literalLeftMatchInput, ",")
 		for _, set := range columns {
-			bits := strings.Split(set, ":")
+			bits := strings.SplitN(set, ":", 2)
 
 			matchOn = append(matchOn, matchSet{
 				LiteralLeft: true,
@@ -74,7 +74,7 @@ func main() {
 	if *literalRightMatchInput != "" {
 		columns := strings.Split(*literalRightMatchInput, ",")
 		for _, set := range columns {
-			bits := strings.Split(set, ":")
+			bits := strings.SplitN(set, ":", 2)
 
 			matchOn = append(matchOn, matchSet{
 				LiteralRight: true,
@@ -87,7 +87,7 @@ func main() {
 	if *inverseLiteralLeftMatchInput != "" {
 		columns := strings.Split(*inverseLiteralLeftMatchInput, ",")
 		for _, set := range columns {
-			bits := strings.Split(set, ":")
+			bits := strings.SplitN(set, ":", 2)
 
 			matchOn = append(matchOn, matchSet{
 				Inverse:     true,
@@ -101,7 +101,7 @@ func main() {
 	if *inverseLiteralRightMatchInput != "" {
 		columns := strings.Split(*inverseLiteralRightMatchInput, ",")
 		for _, set := range columns {
-			bits := strings.Split(set, ":")
+			bits := strings.SplitN(set, ":", 2)
 
 			matchOn = append(matchOn, matchSet{
 				Inverse:      true,
