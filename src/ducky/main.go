@@ -192,7 +192,12 @@ func ducky(input io.Reader, output csv.Writer, matchOn []matchSet) error {
 
 		if numMatches == len(matchOn) {
 			for _, match := range matchOn {
+				if match.Inverse && (match.LiteralRight || match.LiteralLeft) {
+					continue
+				}
+
 				prevLine.Data["ducky_taped"] = "true"
+
 				prevLine.Data[match.Left] = line.Data[match.Left]
 			}
 		} else {

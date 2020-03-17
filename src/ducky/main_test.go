@@ -9,6 +9,7 @@ import (
 )
 
 type test struct {
+	name         string
 	input        string
 	matchOn      []matchSet
 	want         []string
@@ -18,6 +19,7 @@ type test struct {
 func TestGumption(t *testing.T) {
 	tests := []test{
 		{
+			name: "basic",
 			input: `id,start,end
 one,9am,11am
 one,11am,5pm
@@ -37,6 +39,7 @@ one,11am,5pm
 			},
 		},
 		{
+			name: "multiline basic",
 			input: `id,start,end
 one,9am,11am
 one,11am,5pm
@@ -59,6 +62,7 @@ two,11am,5pm
 			},
 		},
 		{
+			name: "three way merge",
 			input: `id,start,end
 one,9am,11am
 one,11am,2pm
@@ -79,6 +83,7 @@ one,2pm,5pm
 			},
 		},
 		{
+			name: "interruption",
 			input: `id,start,end
 one,9am,11am
 one,11am,2pm
@@ -102,6 +107,7 @@ one,2pm,5pm
 			},
 		},
 		{
+			name: "literal right",
 			input: `id,paycode,start,end
 one,foo,9am,11am
 one,bar,11am,5pm
@@ -130,6 +136,7 @@ one,quux,11am,5pm
 			},
 		},
 		{
+			name: "literal left",
 			input: `id,paycode,start,end
 one,foo,9am,11am
 one,bar,11am,5pm
@@ -158,6 +165,7 @@ one,quux,11am,5pm
 			},
 		},
 		{
+			name: "non contiguous",
 			input: `id,start,end,ducky_taped
 one,9am,11am,true
 one,11am,5pm,false
@@ -181,6 +189,7 @@ two,11am,5pm,false
 			},
 		},
 		{
+			name: "inverse literal right",
 			input: `id,start,end
 one,9am,11am
 one,11am,5pm
@@ -210,6 +219,76 @@ two,11am,never
 			},
 		},
 		{
+			name: "inverse literal right",
+			input: `id,start,end,classification
+one,9am,11am,foo
+one,11am,wut,foo
+one,11am,wut,foo
+`,
+			matchOn: []matchSet{
+				matchSet{
+					Left:  "id",
+					Right: "id",
+				},
+				matchSet{
+					Left:  "classification",
+					Right: "classification",
+				},
+				matchSet{
+					Left:  "end",
+					Right: "start",
+				},
+				matchSet{
+					Inverse:      true,
+					LiteralRight: true,
+					Left:         "end",
+					Right:        "wut",
+				},
+			},
+			want: []string{
+				"one,9am,11am,foo,false",
+				"one,11am,wut,foo,false",
+				"one,11am,wut,foo,false",
+			},
+		},
+		{
+			name: "double inverse literal right",
+			input: `id,start,end
+one,9am,11am
+one,11am,5pm
+two,never,never
+two,never,never
+`,
+			matchOn: []matchSet{
+				matchSet{
+					Left:  "end",
+					Right: "start",
+				},
+				matchSet{
+					Left:  "id",
+					Right: "id",
+				},
+				matchSet{
+					Inverse:      true,
+					LiteralRight: true,
+					Left:         "end",
+					Right:        "never",
+				},
+				matchSet{
+					Inverse:      true,
+					LiteralRight: true,
+					Left:         "start",
+					Right:        "never",
+				},
+			},
+			want: []string{
+				"one,9am,5pm,true",
+				"two,never,never,false",
+				"two,never,never,false",
+			},
+		},
+		{
+			name: "inverse basic match",
 			input: `id,start,end
 one,9am,11am
 one,12am,5pm
@@ -245,7 +324,7 @@ two,11am,5pm
 		writer.Flush()
 
 		for _, ex := range tc.want {
-			assert.Contains(t, result.String(), ex)
+			assert.Contains(t, result.String(), ex, tc.name)
 		}
 		if tc.demandLength != 0 {
 			assert.Equal(t, tc.demandLength, len(strings.Split(result.String(), "\n")))
