@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/paidright/datalab/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,7 +17,297 @@ type test struct {
 	demandLength int
 }
 
-func TestGumption(t *testing.T) {
+type matchTest struct {
+	name  string
+	left  util.Line
+	right util.Line
+	match matchSet
+	want  bool
+}
+
+type anyMatchTest struct {
+	name  string
+	group []util.Line
+	match matchSet
+	want  bool
+}
+
+func TestDoLinesMatch(t *testing.T) {
+	tests := []matchTest{
+		{
+			name: "basic match",
+			left: util.Line{
+				Data: map[string]string{
+					"start": "11am",
+					"end":   "5pm",
+				},
+			},
+			right: util.Line{
+				Data: map[string]string{
+					"start": "9am",
+					"end":   "11am",
+				},
+			},
+			match: matchSet{
+				Left:  "start",
+				Right: "end",
+			},
+			want: true,
+		},
+		{
+			name: "basic miss",
+			left: util.Line{
+				Data: map[string]string{
+					"start": "1pm",
+					"end":   "5pm",
+				},
+			},
+			right: util.Line{
+				Data: map[string]string{
+					"start": "9am",
+					"end":   "11am",
+				},
+			},
+			match: matchSet{
+				Left:  "start",
+				Right: "end",
+			},
+			want: false,
+		},
+		{
+			name: "inverse basic match",
+			left: util.Line{
+				Data: map[string]string{
+					"start": "11am",
+					"end":   "5pm",
+				},
+			},
+			right: util.Line{
+				Data: map[string]string{
+					"start": "9am",
+					"end":   "11am",
+				},
+			},
+			match: matchSet{
+				Left:    "start",
+				Right:   "end",
+				Inverse: true,
+			},
+			want: false,
+		},
+		{
+			name: "inverse basic miss",
+			left: util.Line{
+				Data: map[string]string{
+					"start": "1pm",
+					"end":   "5pm",
+				},
+			},
+			right: util.Line{
+				Data: map[string]string{
+					"start": "9am",
+					"end":   "11am",
+				},
+			},
+			match: matchSet{
+				Left:    "start",
+				Right:   "end",
+				Inverse: true,
+			},
+			want: true,
+		},
+		{
+			name: "literal right match",
+			left: util.Line{
+				Data: map[string]string{
+					"paycode": "foo",
+					"end":     "11am",
+				},
+			},
+			right: util.Line{
+				Data: map[string]string{
+					"paycode": "bar",
+					"end":     "5pm",
+				},
+			},
+			match: matchSet{
+				LiteralRight: true,
+				Left:         "paycode",
+				Right:        "bar",
+			},
+			want: true,
+		},
+		{
+			name: "literal left match",
+			left: util.Line{
+				Data: map[string]string{
+					"paycode": "foo",
+					"end":     "11am",
+				},
+			},
+			right: util.Line{
+				Data: map[string]string{
+					"paycode": "bar",
+					"end":     "5pm",
+				},
+			},
+			match: matchSet{
+				LiteralLeft: true,
+				Left:        "paycode",
+				Right:       "foo",
+			},
+			want: true,
+		},
+		{
+			name: "literal right miss",
+			left: util.Line{
+				Data: map[string]string{
+					"paycode": "foo",
+					"end":     "11am",
+				},
+			},
+			right: util.Line{
+				Data: map[string]string{
+					"paycode": "bar",
+					"end":     "5pm",
+				},
+			},
+			match: matchSet{
+				LiteralRight: true,
+				Left:         "paycode",
+				Right:        "foo",
+			},
+			want: false,
+		},
+		{
+			name: "literal left miss",
+			left: util.Line{
+				Data: map[string]string{
+					"paycode": "foo",
+					"end":     "11am",
+				},
+			},
+			right: util.Line{
+				Data: map[string]string{
+					"paycode": "bar",
+					"end":     "5pm",
+				},
+			},
+			match: matchSet{
+				LiteralLeft: true,
+				Left:        "paycode",
+				Right:       "bar",
+			},
+			want: false,
+		},
+		{
+			name: "inverse literal right match",
+			left: util.Line{
+				Data: map[string]string{
+					"paycode": "foo",
+					"end":     "11am",
+				},
+			},
+			right: util.Line{
+				Data: map[string]string{
+					"paycode": "quux",
+					"end":     "5pm",
+				},
+			},
+			match: matchSet{
+				Inverse:      true,
+				LiteralRight: true,
+				Left:         "paycode",
+				Right:        "bar",
+			},
+			want: true,
+		},
+		{
+			name: "inverse literal right miss",
+			left: util.Line{
+				Data: map[string]string{
+					"paycode": "foo",
+					"end":     "11am",
+				},
+			},
+			right: util.Line{
+				Data: map[string]string{
+					"paycode": "bar",
+					"end":     "5pm",
+				},
+			},
+			match: matchSet{
+				Inverse:      true,
+				LiteralRight: true,
+				Left:         "paycode",
+				Right:        "bar",
+			},
+			want: false,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, doLinesMatch(tc.left, tc.right, tc.match), tc.name)
+		})
+	}
+}
+
+func TestAnyLinesMatch(t *testing.T) {
+	tests := []anyMatchTest{
+		{
+			name: "basic match",
+			group: []util.Line{
+				util.Line{
+					Data: map[string]string{
+						"start": "11am",
+						"end":   "5pm",
+					},
+				},
+				util.Line{
+					Data: map[string]string{
+						"start": "9am",
+						"end":   "11am",
+					},
+				},
+			},
+			match: matchSet{
+				Left:  "start",
+				Right: "end",
+			},
+			want: true,
+		},
+		{
+			name: "literal left match",
+			group: []util.Line{
+				util.Line{
+					Data: map[string]string{
+						"paycode": "bar",
+						"end":     "5pm",
+					},
+				},
+				util.Line{
+					Data: map[string]string{
+						"paycode": "foo",
+						"end":     "11am",
+					},
+				},
+			},
+			match: matchSet{
+				LiteralLeft: true,
+				Left:        "paycode",
+				Right:       "foo",
+			},
+			want: true,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, anyLinesMatch(tc.group, tc.match), tc.name)
+		})
+	}
+}
+
+func TestDucky(t *testing.T) {
 	tests := []test{
 		{
 			name: "basic",
@@ -80,6 +371,43 @@ one,2pm,5pm
 			},
 			want: []string{
 				"one,9am,5pm,true",
+			},
+		},
+		{
+			name: "three way with any",
+			input: `id,start,end,flag
+foo,9am,11am,yep
+foo,11am,2pm,nope
+foo,2pm,5pm,nope
+one,9am,11am,nope
+one,11am,2pm,yep
+one,2pm,5pm,nope
+two,9am,11am,nope
+two,11am,2pm,nope
+two,2pm,5pm,nope
+`,
+			matchOn: []matchSet{
+				matchSet{
+					Left:  "id",
+					Right: "id",
+				},
+				matchSet{
+					Left:  "end",
+					Right: "start",
+				},
+				matchSet{
+					MatchAny:     true,
+					LiteralRight: true,
+					Left:         "flag",
+					Right:        "yep",
+				},
+			},
+			want: []string{
+				"foo,9am,5pm,yep,true",
+				"one,9am,5pm,nope,true",
+				"two,9am,11am,nope,false",
+				"two,11am,2pm,nope,false",
+				"two,2pm,5pm,nope,false",
 			},
 		},
 		{
@@ -258,6 +586,8 @@ one,9am,11am
 one,11am,5pm
 two,never,never
 two,never,never
+never,never,never
+never,never,never
 `,
 			matchOn: []matchSet{
 				matchSet{
@@ -277,7 +607,7 @@ two,never,never
 				matchSet{
 					Inverse:      true,
 					LiteralRight: true,
-					Left:         "start",
+					Left:         "id",
 					Right:        "never",
 				},
 			},
@@ -315,19 +645,21 @@ two,11am,5pm
 	}
 
 	for _, tc := range tests {
-		result := strings.Builder{}
+		t.Run(tc.name, func(t *testing.T) {
+			result := strings.Builder{}
 
-		writer := csv.NewWriter(&result)
+			writer := csv.NewWriter(&result)
 
-		assert.Nil(t, ducky(strings.NewReader(tc.input), *writer, tc.matchOn))
+			assert.Nil(t, ducky(strings.NewReader(tc.input), *writer, tc.matchOn, "id"))
 
-		writer.Flush()
+			writer.Flush()
 
-		for _, ex := range tc.want {
-			assert.Contains(t, result.String(), ex, tc.name)
-		}
-		if tc.demandLength != 0 {
-			assert.Equal(t, tc.demandLength, len(strings.Split(result.String(), "\n")))
-		}
+			for _, ex := range tc.want {
+				assert.Contains(t, result.String(), ex, tc.name)
+			}
+			if tc.demandLength != 0 {
+				assert.Equal(t, tc.demandLength, len(strings.Split(result.String(), "\n")))
+			}
+		})
 	}
 }

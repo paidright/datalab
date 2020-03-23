@@ -18,6 +18,7 @@ var literalLeftMatchInput = flag.String("match-literal-left", "", "A comma separ
 var literalRightMatchInput = flag.String("match-literal-right", "", "A comma separated list values to match the right branch on. eg: paycode:extra_hours")
 var inverseLiteralLeftMatchInput = flag.String("inverse-match-literal-left", "", "A comma separated list values to inverse match the left branch on. eg: paycode:salary")
 var inverseLiteralRightMatchInput = flag.String("inverse-match-literal-right", "", "A comma separated list values to inverse match the right branch on. eg: paycode:extra_hours")
+var groupKey = flag.String("group-key", "id", "The header with which to group (sorted!) rows")
 
 var logger = util.Logger{}
 
@@ -112,7 +113,7 @@ func main() {
 		}
 	}
 
-	if err := ducky(os.Stdin, *output, matchOn); err != nil {
+	if err := ducky(os.Stdin, *output, matchOn, *groupKey); err != nil {
 		logger.Fatal(err)
 	}
 
@@ -121,7 +122,7 @@ func main() {
 	logDone()
 }
 
-func ducky(input io.Reader, output csv.Writer, matchOn []matchSet) error {
+func ducky(input io.Reader, output csv.Writer, matchOn []matchSet, groupKey string) error {
 	work, errors := util.ReadSourceAsync(input)
 
 	var cachedErr error
@@ -135,89 +136,144 @@ func ducky(input io.Reader, output csv.Writer, matchOn []matchSet) error {
 	headersPrinted := false
 
 	prevLine := util.Line{}
+	group := []util.Line{}
 
 	for line := range work {
-		if _, ok := line.Data["ducky_taped"]; !ok {
-			line.Headers = append(line.Headers, "ducky_taped")
-			line.Data["ducky_taped"] = "false"
-		}
-
 		if !headersPrinted {
-			if err := output.Write(line.Headers); err != nil {
+			if err := output.Write(append(line.Headers, "ducky_taped")); err != nil {
 				return err
 			}
 			headersPrinted = true
 		}
 
-		if len(prevLine.Headers) == 0 {
+		if prevLine.Data[groupKey] == line.Data[groupKey] || len(prevLine.Headers) == 0 {
+			group = append(group, line)
+		} else {
+			result := matchGroup(group, matchOn)
+			for _, l := range result {
+				if err := emitLine(l, &output); err != nil {
+					return err
+				}
+			}
+			group = []util.Line{line}
+		}
+		prevLine = line
+	}
+
+	result := matchGroup(group, matchOn)
+	for _, l := range result {
+		if err := emitLine(l, &output); err != nil {
+			return err
+		}
+	}
+
+	output.Flush()
+
+	return cachedErr
+}
+
+func doLinesMatch(left util.Line, right util.Line, match matchSet) bool {
+	matched := false
+
+	if match.LiteralRight {
+		if right.Data[match.Left] == match.Right {
+			matched = true
+		}
+	} else if match.LiteralLeft {
+		if left.Data[match.Left] == match.Right {
+			matched = true
+		}
+	} else {
+		if left.Data[match.Left] == right.Data[match.Right] {
+			matched = true
+		}
+	}
+
+	if match.Inverse {
+		matched = !matched
+	}
+
+	return matched
+}
+
+func anyLinesMatch(group []util.Line, match matchSet) bool {
+	anyMatch := false
+	group = append(group, util.Line{})
+	for i, line := range group {
+		left := util.Line{}
+		if i != 0 {
+			left = group[i-1]
+		}
+		matched := doLinesMatch(left, line, match)
+		if matched {
+			//if doLinesMatch(group[i-1], line, match) {
+			anyMatch = true
+		}
+	}
+	return anyMatch
+}
+
+func matchGroup(group []util.Line, allMatches []matchSet) []util.Line {
+	if len(group) == 1 {
+		group[0].Data["ducky_taped"] = "false"
+		return group
+	}
+
+	for _, match := range allMatches {
+		if match.MatchAny {
+			if !anyLinesMatch(group, match) {
+				for _, line := range group {
+					line.Data["ducky_taped"] = "false"
+				}
+				return group
+			}
+		}
+	}
+
+	matchOn := []matchSet{}
+	for _, match := range allMatches {
+		if !match.MatchAny {
+			matchOn = append(matchOn, match)
+		}
+	}
+	requiredMatches := len(matchOn)
+
+	prevLine := util.Line{}
+	result := []util.Line{}
+
+	for i, line := range group {
+		numMatches := 0
+		if i == 0 {
 			prevLine = line
+			prevLine.Data["ducky_taped"] = "false"
 			continue
 		}
-
-		numMatches := 0
 		for _, match := range matchOn {
-			matched := false
-
-			if match.LiteralRight {
-				if line.Data[match.Left] == match.Right {
-					if match.Inverse {
-						continue
-					}
-					matched = true
-				}
-			} else if match.LiteralLeft {
-				if prevLine.Data[match.Left] == match.Right {
-					if match.Inverse {
-						continue
-					}
-					matched = true
-				}
-			} else {
-				if prevLine.Data[match.Left] == line.Data[match.Right] {
-					if match.Inverse {
-						continue
-					}
-					matched = true
-				}
-			}
-
-			if match.Inverse && !matched {
-				matched = true
-			}
-
+			matched := doLinesMatch(prevLine, line, match)
 			if matched {
 				numMatches += 1
 			}
 		}
 
-		if numMatches == len(matchOn) {
+		// If we hit all the matches for this line, merge it into prevLine and discard it
+		if numMatches == requiredMatches {
 			for _, match := range matchOn {
-				if match.Inverse && (match.LiteralRight || match.LiteralLeft) {
-					continue
-				}
-
 				prevLine.Data["ducky_taped"] = "true"
-
 				prevLine.Data[match.Left] = line.Data[match.Left]
 			}
 		} else {
-			if err := emitLine(prevLine, &output); err != nil {
-				return err
-			}
-
-			prevLine.Data = line.Data
+			result = append(result, prevLine)
+			prevLine = line
+			prevLine.Data["ducky_taped"] = "false"
 		}
 	}
 
-	if err := emitLine(prevLine, &output); err != nil {
-		return err
-	}
-
-	return cachedErr
+	return append(result, prevLine)
 }
 
 func emitLine(line util.Line, output *csv.Writer) error {
 	newLine := []string{}
+	line.Headers = append(line.Headers, "ducky_taped")
 	for _, header := range line.Headers {
 		newLine = append(newLine, line.Data[header])
 	}
@@ -231,6 +287,7 @@ type matchSet struct {
 	Right        string
 	LiteralRight bool
 	Inverse      bool
+	MatchAny     bool
 }
 
 func logDone() {
